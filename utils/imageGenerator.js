@@ -1,14 +1,23 @@
 const { createCanvas, loadImage } = require('canvas');
 const fs = require('fs');
+const path = require('path');
 
 module.exports = async ({ name, union, type }) => {
 
+  // ✅ Absolute template path (VERY IMPORTANT for Render)
   const templateMap = {
-    birthday: 'templates/birthday.png',
-    anniversary: 'templates/anniversary.png'
+    birthday: path.join(__dirname, '../templates/birthday.png'),
+    anniversary: path.join(__dirname, '../templates/anniversary.png')
   };
 
-  const template = await loadImage(templateMap[type]);
+  const templatePath = templateMap[type];
+
+  if (!templatePath) {
+    throw new Error("Invalid type");
+  }
+
+  const template = await loadImage(templatePath);
+
   const canvas = createCanvas(template.width, template.height);
   const ctx = canvas.getContext('2d');
 
@@ -17,12 +26,12 @@ module.exports = async ({ name, union, type }) => {
   // 🎨 Theme Colors
   const theme = {
     birthday: {
-      primary: "#0A3D62",     // Union Bank blue
+      primary: "#0A3D62",
       accent: "#1E90FF",
       text: "#FFFFFF"
     },
     anniversary: {
-      primary: "#B8860B",     // gold
+      primary: "#B8860B",
       accent: "#FFD700",
       text: "#FFFFFF"
     }
@@ -30,28 +39,28 @@ module.exports = async ({ name, union, type }) => {
 
   const currentTheme = theme[type];
 
-  // 🌫️ Overlay for better readability
+  // 🌫️ Overlay
   ctx.fillStyle = "rgba(0,0,0,0.25)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // ✨ Text Shadow for premium look
+  // ✨ Shadow
   ctx.shadowColor = "rgba(0,0,0,0.6)";
   ctx.shadowBlur = 10;
   ctx.shadowOffsetY = 3;
 
   ctx.textAlign = "center";
 
-  // 🏦 Header (Top)
+  // 🏦 Header
   ctx.fillStyle = currentTheme.accent;
   ctx.font = "bold 42px Sans-serif";
   ctx.fillText(`Union Bank - ${union}`, canvas.width / 2, 120);
 
-  // 👤 Name (Center Focus)
+  // 👤 Name
   ctx.fillStyle = currentTheme.text;
   ctx.font = "bold 75px Sans-serif";
   ctx.fillText(name, canvas.width / 2, canvas.height / 2);
 
-  // 🎉 Message (Bottom)
+  // 🎉 Message
   ctx.fillStyle = currentTheme.accent;
   ctx.font = "bold 36px Sans-serif";
   ctx.fillText(
@@ -60,7 +69,7 @@ module.exports = async ({ name, union, type }) => {
     canvas.height - 120
   );
 
-  // 📏 Optional underline accent (modern touch)
+  // 📏 underline
   ctx.beginPath();
   ctx.strokeStyle = currentTheme.accent;
   ctx.lineWidth = 3;
@@ -68,10 +77,17 @@ module.exports = async ({ name, union, type }) => {
   ctx.lineTo(canvas.width * 3 / 4, canvas.height / 2 + 40);
   ctx.stroke();
 
+  // ✅ Ensure images folder exists
+  const imagesDir = path.join(__dirname, '../images');
+  if (!fs.existsSync(imagesDir)) {
+    fs.mkdirSync(imagesDir);
+  }
+
   const fileName = `${name}_${Date.now()}.png`;
-  const path = `images/${fileName}`;
+  const filePath = path.join(imagesDir, fileName);
 
-  fs.writeFileSync(path, canvas.toBuffer());
+  fs.writeFileSync(filePath, canvas.toBuffer());
 
-  return `${process.env.BASE_URL}/${path}`;
+  // ✅ Correct public URL
+  return `${process.env.BASE_URL}/images/${fileName}`;
 };

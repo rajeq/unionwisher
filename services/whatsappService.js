@@ -8,10 +8,11 @@ const client = twilio(
 async function sendWhatsApp(to, imageUrl, retry = 1) {
   try {
     console.log(`📤 WhatsApp → ${to}`);
+    console.log(`🖼️ Image URL → ${imageUrl}`);
 
     const message = await client.messages.create({
       from: process.env.TWILIO_WHATSAPP_NUMBER,
-      to: `whatsapp:+91${to}`,
+      to: to, // ✅ FIXED (NO extra formatting)
       mediaUrl: [imageUrl]
     });
 
@@ -19,7 +20,9 @@ async function sendWhatsApp(to, imageUrl, retry = 1) {
     return message;
 
   } catch (err) {
-    console.error(`❌ WhatsApp failed: ${to}`, err.message);
+    console.error(`❌ WhatsApp failed:`, err.message);
+
+    if (err.code) console.error("Twilio Code:", err.code);
 
     if (retry > 0) {
       console.log("🔁 Retrying...");
