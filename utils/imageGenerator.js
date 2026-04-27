@@ -1,93 +1,137 @@
-const { createCanvas, loadImage } = require('canvas');
-const fs = require('fs');
-const path = require('path');
+const { createCanvas, loadImage } = require("canvas");
+const cloudinary = require("./cloudinary");
 
-module.exports = async ({ name, union, type }) => {
+// Upload helper
+function uploadBuffer(buffer, options = {}) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(options, (err, result) => {
+      if (err) return reject(err);
+      resolve(result);
+    });
+    stream.end(buffer);
+  });
+}
 
-  // ✅ Absolute template path (VERY IMPORTANT for Render)
-  const templateMap = {
-    birthday: path.join(__dirname, '../templates/birthday.png'),
-    anniversary: path.join(__dirname, '../templates/anniversary.png')
-  };
-
-  const templatePath = templateMap[type];
-
-  if (!templatePath) {
-    throw new Error("Invalid type");
-  }
-
-  const template = await loadImage(templatePath);
-
-  const canvas = createCanvas(template.width, template.height);
-  const ctx = canvas.getContext('2d');
-
-  ctx.drawImage(template, 0, 0);
-
-  // 🎨 Theme Colors
-  const theme = {
-    birthday: {
-      primary: "#0A3D62",
-      accent: "#1E90FF",
-      text: "#FFFFFF"
-    },
-    anniversary: {
-      primary: "#B8860B",
-      accent: "#FFD700",
-      text: "#FFFFFF"
-    }
-  };
-
-  const currentTheme = theme[type];
-
-  // 🌫️ Overlay
-  ctx.fillStyle = "rgba(0,0,0,0.25)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // ✨ Shadow
-  ctx.shadowColor = "rgba(0,0,0,0.6)";
-  ctx.shadowBlur = 10;
-  ctx.shadowOffsetY = 3;
-
-  ctx.textAlign = "center";
-
-  // 🏦 Header
-  ctx.fillStyle = currentTheme.accent;
-  ctx.font = "bold 42px Sans-serif";
-  ctx.fillText(`Union Bank - ${union}`, canvas.width / 2, 120);
-
-  // 👤 Name
-  ctx.fillStyle = currentTheme.text;
-  ctx.font = "bold 75px Sans-serif";
-  ctx.fillText(name, canvas.width / 2, canvas.height / 2);
-
-  // 🎉 Message
-  ctx.fillStyle = currentTheme.accent;
-  ctx.font = "bold 36px Sans-serif";
-  ctx.fillText(
-    type === "birthday" ? "Happy Birthday 🎂" : "Happy Anniversary 💍",
-    canvas.width / 2,
-    canvas.height - 120
-  );
-
-  // 📏 underline
-  ctx.beginPath();
-  ctx.strokeStyle = currentTheme.accent;
-  ctx.lineWidth = 3;
-  ctx.moveTo(canvas.width / 4, canvas.height / 2 + 40);
-  ctx.lineTo(canvas.width * 3 / 4, canvas.height / 2 + 40);
-  ctx.stroke();
-
-  // ✅ Ensure images folder exists
-  const imagesDir = path.join(__dirname, '../images');
-  if (!fs.existsSync(imagesDir)) {
-    fs.mkdirSync(imagesDir);
-  }
-
-  const fileName = `${name}_${Date.now()}.png`;
-  const filePath = path.join(imagesDir, fileName);
-
-  fs.writeFileSync(filePath, canvas.toBuffer());
-
-  // ✅ Correct public URL
-  return `${process.env.BASE_URL}/images/${fileName}`;
+const TEMPLATE_MAP = {
+  birthday: "templates/birthday.png",
+  anniversary: "templates/anniversary.png",
 };
+
+async function generateImage({ name, union, type }) {
+  try {
+    const template = await loadImage(TEMPLATE_MAP[type] || TEMPLATE_MAP.birthday);
+
+    const canvas = createCanvas(template.width, template.height);
+    const ctx = canvas.getContext("2d");
+
+    // Draw template
+    ctx.drawImage(template, 0, 0);
+
+    const centerX = canvas.width / 2;
+
+    // ===============================
+    // 🎯 HEADER TEXT (Happy)
+    // ===============================
+    ctx.font = "italic 40px Arial";
+    ctx.fillStyle = "#1E3A8A";
+    ctx.textAlign = "center";
+    ctx.fillText("Happy", centerX, 120);
+
+    // ===============================
+    // 🎯 MAIN TITLE (BIRTHDAY / ANNIVERSARY)
+    // ===============================
+    const mainText = type === "anniversary" ? "ANNIVERSARY" : "BIRTHDAY";
+
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+    gradient.addColorStop(0, "#1E3A8A"); // blue
+    gradient.addColorStop(1, "#DC2626"); // red
+
+    ctx.font = "bold 110px Arial";
+    ctx.fillStyle = gradient;
+
+    // shadow for depth
+    ctx.shadowColor = "rgba(0,0,0,0.4)";
+    ctx.shadowBlur = 10;
+
+    ctx.fillText(mainText, centerX, 250);
+
+    // reset shadow
+    ctx.shadowBlur = 0;
+
+    // ===============================
+    // 🎯 BEST WISHES RIBBON STYLE
+    // ===============================
+    const ribbonY = 320;
+
+    // ribbon background
+    const ribbonGradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+    ribbonGradient.addColorStop(0, "#DC2626");
+    ribbonGradient.addColorStop(1, "#1E3A8A");
+
+    ctx.fillStyle = ribbonGradient;
+    ctx.fillRect(centerX - 350, ribbonY, 700, 70);
+
+    // ribbon text
+    ctx.font = "bold 45px Arial";
+    ctx.fillStyle = "#FFD700"; // gold
+    ctx.fillText("BEST WISHES", centerX, ribbonY + 48);
+
+    // ===============================
+    // 🎯 MESSAGE TEXT
+    // ===============================
+    ctx.font = "28px Arial";
+    ctx.fillStyle = "#333";
+    ctx.fillText(
+      "Wishing you a day filled with happiness,",
+      centerX,
+      ribbonY + 120
+    );
+    ctx.fillText(
+      "good health and great success.",
+      centerX,
+      ribbonY + 155
+    );
+
+    // ===============================
+    // 🎯 NAME (HIGHLIGHTED)
+    // ===============================
+    ctx.font = "bold 48px Arial";
+    ctx.fillStyle = "#1E3A8A";
+
+    ctx.shadowColor = "rgba(0,0,0,0.2)";
+    ctx.shadowBlur = 6;
+
+    ctx.fillText(name, centerX, ribbonY + 240);
+
+    ctx.shadowBlur = 0;
+
+    // ===============================
+    // 🎯 UNION
+    // ===============================
+    ctx.font = "30px Arial";
+    ctx.fillStyle = "#555";
+    ctx.fillText(union, centerX, ribbonY + 290);
+
+    // ===============================
+    // 📦 BUFFER → CLOUDINARY
+    // ===============================
+    const buffer = canvas.toBuffer("image/png");
+
+    const publicId = `unionwisher/${name.replace(/\s+/g, "_")}_${Date.now()}`;
+
+    const result = await uploadBuffer(buffer, {
+      folder: "unionwisher",
+      public_id: publicId,
+    });
+
+    console.log("☁️ Uploaded →", result.secure_url);
+
+    return result.secure_url;
+
+  } catch (err) {
+    console.error("❌ Image generation error:", err);
+    throw err;
+  }
+}
+
+module.exports = generateImage;
