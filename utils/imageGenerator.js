@@ -16,8 +16,35 @@ const TEMPLATE_MAP = {
   anniversary: "templates/anniversary.png",
 };
 
-async function generateImage({ name, type }) {
-  const template = await loadImage(TEMPLATE_MAP[type]);
+// 🎯 Config for placement (easy tuning)
+const TEXT_CONFIG = {
+  birthday: {
+    xFactor: 0.5,
+    yFactor: 0.88,
+    maxWidthFactor: 0.8,
+    baseFont: 70,
+  },
+  anniversary: {
+    xFactor: 0.70,
+    yFactor: 0.60,
+    maxWidthFactor: 0.35,
+    baseFont: 55,
+  },
+};
+
+// 🔥 Auto-fit font size
+function fitFont(ctx, text, maxWidth, baseSize) {
+  let fontSize = baseSize;
+  do {
+    ctx.font = `bold ${fontSize}px Arial`;
+    fontSize--;
+  } while (ctx.measureText(text).width > maxWidth && fontSize > 20);
+  return ctx.font;
+}
+
+async function generateImage({ name, type = "birthday" }) {
+  const templatePath = TEMPLATE_MAP[type] || TEMPLATE_MAP.birthday;
+  const template = await loadImage(templatePath);
 
   const canvas = createCanvas(template.width, template.height);
   const ctx = canvas.getContext("2d");
@@ -26,28 +53,33 @@ async function generateImage({ name, type }) {
   ctx.drawImage(template, 0, 0);
 
   ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
 
-  // 🔥 ONLY NAME (based on template layout)
+  const config = TEXT_CONFIG[type];
 
-  if (type === "birthday") {
-    // bottom center
-    ctx.font = "bold 60px Arial";
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillText(name, canvas.width / 2, canvas.height - 150);
-  }
+  const x = canvas.width * config.xFactor;
+  const y = canvas.height * config.yFactor;
+  const maxWidth = canvas.width * config.maxWidthFactor;
 
-  if (type === "anniversary") {
-    // right side area
-    ctx.font = "bold 50px Arial";
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillText(name, canvas.width * 0.70, canvas.height * 0.60);
-  }
+  // 🎯 dynamic font
+  fitFont(ctx, name, maxWidth, config.baseFont);
 
+  ctx.fillStyle = "#FFFFFF";
+
+  // subtle shadow (helps readability on any bg)
+  ctx.shadowColor = "rgba(0,0,0,0.3)";
+  ctx.shadowBlur = 6;
+
+  ctx.fillText(name, x, y, maxWidth);
+
+  ctx.shadowBlur = 0;
+
+  // upload
   const buffer = canvas.toBuffer("image/png");
 
   const result = await uploadBuffer(buffer, {
     folder: "unionwisher",
-    public_id: `unionwisher/${Date.now()}`,
+    public_id: `unionwisher/${name.replace(/\s+/g, "_")}_${Date.now()}`,
   });
 
   return result.secure_url;
