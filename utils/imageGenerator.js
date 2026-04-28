@@ -1,6 +1,9 @@
 const { createCanvas, loadImage } = require("canvas");
 const cloudinary = require("./cloudinary");
 
+// ==============================
+// 📦 Upload helper
+// ==============================
 function uploadBuffer(buffer, options = {}) {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(options, (err, result) => {
@@ -11,78 +14,102 @@ function uploadBuffer(buffer, options = {}) {
   });
 }
 
+// ==============================
+// 🖼 Templates
+// ==============================
 const TEMPLATE_MAP = {
   birthday: "templates/birthday.png",
   anniversary: "templates/anniversary.png",
 };
 
-// 🎯 Config for placement (easy tuning)
-const TEXT_CONFIG = {
+// ==============================
+// 🎯 SAFE ZONE (BETWEEN TEXT & LOGO)
+// ==============================
+const SAFE_ZONE = {
   birthday: {
-    xFactor: 0.5,
-    yFactor: 0.88,
-    maxWidthFactor: 0.8,
+    top: 0.64,     // below wish text
+    bottom: 0.75,  // above logo
+    maxWidth: 0.65,
     baseFont: 70,
   },
   anniversary: {
-    xFactor: 0.70,
-    yFactor: 0.60,
-    maxWidthFactor: 0.35,
+    top: 0.57,     // 🔥 slightly lower than text
+    bottom: 0.65,  // 🔥 above logo
+    maxWidth: 0.35,
     baseFont: 55,
+    x: 0.72, 
   },
 };
 
-// 🔥 Auto-fit font size
-function fitFont(ctx, text, maxWidth, baseSize) {
-  let fontSize = baseSize;
-  do {
-    ctx.font = `bold ${fontSize}px Arial`;
-    fontSize--;
-  } while (ctx.measureText(text).width > maxWidth && fontSize > 20);
-  return ctx.font;
+// ==============================
+// 🔥 Auto-fit font
+// ==============================
+function getFontSize(ctx, text, maxWidth, baseSize) {
+  let size = baseSize;
+  while (size > 20) {
+    ctx.font = `bold ${size}px Arial`;
+    if (ctx.measureText(text).width <= maxWidth) break;
+    size--;
+  }
+  return size;
 }
 
+// ==============================
+// 🎯 MAIN FUNCTION
+// ==============================
 async function generateImage({ name, type = "birthday" }) {
-  const templatePath = TEMPLATE_MAP[type] || TEMPLATE_MAP.birthday;
-  const template = await loadImage(templatePath);
+  try {
+    const templatePath = TEMPLATE_MAP[type] || TEMPLATE_MAP.birthday;
+    const template = await loadImage(templatePath);
 
-  const canvas = createCanvas(template.width, template.height);
-  const ctx = canvas.getContext("2d");
+    const canvas = createCanvas(template.width, template.height);
+    const ctx = canvas.getContext("2d");
 
-  // draw template
-  ctx.drawImage(template, 0, 0);
+    // draw template
+    ctx.drawImage(template, 0, 0);
 
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
 
-  const config = TEXT_CONFIG[type];
+    const zone = SAFE_ZONE[type];
 
-  const x = canvas.width * config.xFactor;
-  const y = canvas.height * config.yFactor;
-  const maxWidth = canvas.width * config.maxWidthFactor;
+    // center of safe zone
+    //const x = canvas.width / 2;
+    const x = canvas.width * (zone.x || 0.5);
+    const y =
+      canvas.height * ((zone.top + zone.bottom) / 2);
 
-  // 🎯 dynamic font
-  fitFont(ctx, name, maxWidth, config.baseFont);
+    const maxWidth = canvas.width * zone.maxWidth;
 
-  ctx.fillStyle = "#FFFFFF";
+    // font fit
+    const fontSize = getFontSize(ctx, name, maxWidth, zone.baseFont);
+    ctx.font = `bold ${fontSize}px Arial`;
 
-  // subtle shadow (helps readability on any bg)
-  ctx.shadowColor = "rgba(0,0,0,0.3)";
-  ctx.shadowBlur = 6;
+    // style
+    ctx.fillStyle = "#FFFFFF";
+    ctx.shadowColor = "rgba(0,0,0,0.25)";
+    ctx.shadowBlur = 4;
 
-  ctx.fillText(name, x, y, maxWidth);
+    // draw name
+    ctx.fillText(name, x, y, maxWidth);
 
-  ctx.shadowBlur = 0;
+    ctx.shadowBlur = 0;
 
-  // upload
-  const buffer = canvas.toBuffer("image/png");
+    // ==============================
+    // ☁️ Upload
+    // ==============================
+    const buffer = canvas.toBuffer("image/png");
 
-  const result = await uploadBuffer(buffer, {
-    folder: "unionwisher",
-    public_id: `unionwisher/${name.replace(/\s+/g, "_")}_${Date.now()}`,
-  });
+    const result = await uploadBuffer(buffer, {
+      folder: "unionwisher",
+      public_id: `unionwisher/${name.replace(/\s+/g, "_")}_${Date.now()}`,
+    });
 
-  return result.secure_url;
+    return result.secure_url;
+  } catch (err) {
+    console.error("Image generation error:", err);
+    throw err;
+  }
 }
 
 module.exports = generateImage;
