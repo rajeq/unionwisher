@@ -11,7 +11,6 @@ module.exports = [
     email: "rajeshthesoft97@gmail.com",
     dob: formatDate(0),
     anniversary: formatDate(1),
-    union: "Union A"
   },
   {
     name: "Suresh",
@@ -19,7 +18,6 @@ module.exports = [
     email: "rajeshthesoft97@gmail.com",
     dob: formatDate(1),
     anniversary: formatDate(0),
-    union: "Union B"
   },
   {
     name: "Dhana",
@@ -27,6 +25,5 @@ module.exports = [
     email: "rajeshthesoft97@gmail.com",
     dob: formatDate(0),
     anniversary: formatDate(0),
-    union: "Union A"
   }
 ];

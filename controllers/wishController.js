@@ -10,7 +10,7 @@ exports.sendWish = async (req, res) => {
     if (!name || !phone || !union || !type) {
       return res.status(400).json({ error: "Missing required fields" });
     }
-
+    console.log("TYPE FROM FRONTEND:", req.body.type);
     // ✅ Clean input
     name = String(name).trim();
     phone = String(phone).trim();
@@ -46,7 +46,7 @@ exports.sendWish = async (req, res) => {
     // =========================================================
     let imageUrl;
     try {
-      imageUrl = await generateImage({ name, union, type });
+      imageUrl = await generateImage({ name, union, type, joinDate: req.body.joinDate,  });
       console.log("🖼️ Image URL:", imageUrl);
     } catch (err) {
       console.error("❌ Image Generation Failed:", err);
