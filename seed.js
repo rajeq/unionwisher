@@ -20,10 +20,9 @@ function formatDate(d) {
   await Employee.deleteMany({});
 
   await Employee.insertMany([
-    { name: "Ravi", phone: "9440059431", email: "test1@gmail.com", union: "Union A", dob: today, joiningDate: today },
-    { name: "Suresh", phone: "9701415172", email: "test2@gmail.com", union: "Union B", dob: tomorrow, joiningDate: tomorrow },
-    { name: "Dhana", phone: "9701415172", email: "test3@gmail.com", union: "Union A", dob: today, joiningDate: today },
-    { name: "Rishan", phone: "9440059431", email: "test4@gmail.com", union: "Union A", dob: today, joiningDate: today },
+    { name: "DhanaA", phone: "9440059431", email: "test1@gmail.com", union: "Union A", dob: today, joiningDate: today },
+    { name: "DhanaB", phone: "9440059431", email: "test1@gmail.com", union: "Union B", dob: today, joiningDate: today },
+    { name: "DhanaC", phone: "9440059431", email: "test1@gmail.com", union: "Union C", dob: today, joiningDate: today },
   ]);
 
   console.log("✅ Seeded");

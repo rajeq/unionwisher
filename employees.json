@@ -1,26 +1,16 @@
 [
   {
-    "name": "Updated",
+    "name": "Rajesh C",
     "phone": "9440059431",
-    "email": "dhana@gmail.com",
-    "union": "Union A",
-    "dob": "27-04-2026",
-    "joiningDate": "27-04-2020"
+    "email": "rajesh@gmail.com",
+    "dob": "02-05-1995",
+    "joiningDate": "02-05-2020"
   },
   {
-    "name": "Dhana Uploaded",
-    "phone": "9701415172",
+    "name": "Suresh C",
+    "phone": "9440059431",
     "email": "suresh@gmail.com",
-    "union": "Union B",
-    "dob": "28-04-2026",
-    "joiningDate": "28-04-2021"
-  },
-  {
-    "name": "Dhana Duplicate",
-    "phone": "9701415172",
-    "email": "dhana@gmail.com",
-    "union": "Union A",
-    "dob": "27-04-2026",
-    "joiningDate": "27-04-2019"
+    "dob": "02-05-1990",
+    "joiningDate": "02-05-2018"
   }
 ]
