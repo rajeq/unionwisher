@@ -1,7 +1,5 @@
 const { createCanvas, loadImage } = require("canvas");
 const cloudinary = require("./cloudinary");
-const fs = require("fs");
-const path = require("path");
 
 // ==============================
 // 📦 Upload helper
@@ -17,32 +15,30 @@ function uploadBuffer(buffer, options = {}) {
 }
 
 // ==============================
-// 🖼 Template Resolver
+// 🌐 Cloudinary Template Resolver
 // ==============================
-function getTemplatePath(type, union) {
+function getTemplateUrl(type, union) {
+  const safeUnion = union?.replace(/\s+/g, "").toLowerCase();
+
+  return `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/unionwisher/templates/${type}_${safeUnion}.png`;
+}
+
+// ==============================
+// 🔁 Load Template (with fallback)
+// ==============================
+async function loadTemplate(type, union) {
   try {
-    const safeUnion = union?.replace(/\s+/g, "").toLowerCase();
+    const url = getTemplateUrl(type, union);
 
-    const basePath = path.resolve(process.cwd(), "templates");
+    console.log("🌐 TEMPLATE URL:", url);
 
-    const unionPath = path.join(basePath, `${type}_${safeUnion}.png`);
-    const defaultPath = path.join(basePath, `${type}.png`);
-
-    console.log("🧩 TYPE:", type);
-    console.log("🧩 UNION:", union);
-    console.log("🧩 TRY PATH:", unionPath);
-
-    if (safeUnion && fs.existsSync(unionPath)) {
-      console.log("✅ Using UNION template");
-      return unionPath;
-    }
-
-    console.log("⚠️ Using DEFAULT template:", defaultPath);
-    return defaultPath;
-
+    return await loadImage(url);
   } catch (err) {
-    console.error("❌ Template resolve error:", err);
-    return path.resolve(process.cwd(), "templates", `${type}.png`);
+    console.warn("⚠️ Using fallback template");
+
+    const fallback = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/unionwisher/templates/${type}.png`;
+
+    return await loadImage(fallback);
   }
 }
 
@@ -122,10 +118,13 @@ function getOrdinal(n) {
 // ==============================
 async function generateImage({ name, type = "birthday", joinDate, union }) {
   try {
-    const templatePath = getTemplatePath(type, union);
-    console.log("🔥 FINAL TEMPLATE:", templatePath);
+    console.log("📌 TYPE:", type);
+    console.log("📌 NAME:", name);
+    console.log("📌 UNION:", union);
+    console.log("📌 JOIN DATE:", joinDate);
 
-    const template = await loadImage(templatePath);
+    // 🔥 LOAD TEMPLATE FROM CLOUDINARY
+    const template = await loadTemplate(type, union);
 
     const canvas = createCanvas(template.width, template.height);
     const ctx = canvas.getContext("2d");
@@ -141,10 +140,6 @@ async function generateImage({ name, type = "birthday", joinDate, union }) {
     const y = canvas.height * ((zone.top + zone.bottom) / 2);
     const maxWidth = canvas.width * zone.maxWidth;
 
-    console.log("📌 TYPE:", type);
-    console.log("📌 NAME:", name);
-    console.log("📌 JOIN DATE:", joinDate);
-
     let displayName = name;
 
     // ==============================
@@ -159,17 +154,14 @@ async function generateImage({ name, type = "birthday", joinDate, union }) {
         const ordinal = getOrdinal(years);
         const suffix = ordinal.replace(years, "");
 
-        displayName = name;
-
-        // 🔥 BIG NUMBER LEFT SIDE
-        const leftX = canvas.width * 0.26;
-        const centerY = canvas.height * 0.50;
+        const leftX = canvas.width * 0.26;   // slight right adjust
+        const centerY = canvas.height * 0.50; // slight down adjust
 
         ctx.save();
 
-        ctx.globalAlpha = 0.18;
-        ctx.font = "bold 150px Arial";
-        ctx.fillStyle = "#0adaf1e7";
+        ctx.globalAlpha = 0.60;
+        ctx.font = "bold 160px Arial";
+        ctx.fillStyle = "#00f2ff";
 
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -178,12 +170,12 @@ async function generateImage({ name, type = "birthday", joinDate, union }) {
 
         ctx.restore();
 
-        // 🔥 SUFFIX
-        ctx.font = "bold 30px Arial";
+        // suffix (st, nd, th)
+        ctx.font = "bold 32px Arial";
         ctx.fillStyle = "#FFD700";
-        ctx.fillText(suffix, leftX + 70, centerY - 60);
+        ctx.fillText(suffix, leftX + 75, centerY - 70);
 
-        console.log("✅ DRAWN ANNIVERSARY:", ordinal);
+        console.log("✅ ANNIVERSARY DRAWN:", ordinal);
       } else {
         console.log("❌ INVALID YEARS → check joinDate");
       }
@@ -204,7 +196,7 @@ async function generateImage({ name, type = "birthday", joinDate, union }) {
     ctx.shadowBlur = 0;
 
     // ==============================
-    // ☁️ Upload
+    // ☁️ Upload final image
     // ==============================
     const buffer = canvas.toBuffer("image/png");
 
