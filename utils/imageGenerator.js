@@ -78,11 +78,18 @@ function getFontSize(ctx, text, maxWidth, baseSize) {
 // ==============================
 // 🔥 DATE PARSER
 // ==============================
-function parseDate(ddmmyyyy) {
-  if (!ddmmyyyy || !ddmmyyyy.includes("-")) return null;
+function parseDate(dateStr) {
+  if (!dateStr) return null;
 
-  const [day, month, year] = ddmmyyyy.split("-");
-  return new Date(`${year}-${month}-${day}`);
+  // ✅ Case 1: dd-mm-yyyy
+  if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+    const [d, m, y] = dateStr.split("-");
+    return new Date(`${y}-${m}-${d}`);
+  }
+
+  // ✅ Case 2: ISO / Mongo format (production)
+  const d = new Date(dateStr);
+  return isNaN(d) ? null : d;
 }
 
 // ==============================
