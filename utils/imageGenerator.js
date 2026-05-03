@@ -90,6 +90,7 @@ function parseDate(dateStr) {
   // ✅ Case 2: ISO / Mongo format (production)
   const d = new Date(dateStr);
   return isNaN(d) ? null : d;
+  console.log("test date:", d);
 }
 
 // ==============================
