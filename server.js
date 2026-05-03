@@ -16,6 +16,11 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 // ✅ Health
 app.get('/health', (req, res) => res.send('OK'));
 
+
+// ✅ Auth routes
+const authRoutes = require("./routes/authRoutes");
+app.use("/api/auth", authRoutes);
+
 // ✅ Routes
 const wishRoutes = require('./routes/wishRoutes');
 app.use('/api', wishRoutes);
