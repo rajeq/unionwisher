@@ -145,7 +145,17 @@ ctx.textBaseline = "middle";
 const zone = SAFE_ZONE[type];
 
 const x = canvas.width * (zone.x || 0.5);
-const y = canvas.height * ((zone.top + zone.bottom) / 2);
+// const y = canvas.height * ((zone.top + zone.bottom) / 2);
+  let y = canvas.height * ((zone.top + zone.bottom) / 2);
+
+// 🎯 Move name slightly lower
+if (type === "birthday") {
+  y -= 30;
+}
+
+if (type === "anniversary") {
+  y -= 20;
+}
 const maxWidth = canvas.width * zone.maxWidth;
 
 let displayName = name;
