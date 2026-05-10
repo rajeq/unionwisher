@@ -1,141 +1,3 @@
-
-
-
-Logo RemoveUnion bank APUBOA logo in the image and give me
-
-Generated image: Work anniversary celebration with elegance
-
-
-Edit
-
-
-Do the same thing for this image aswell
-
-Generated image: Bright birthday celebration with gifts and balloons
-
-
-Edit
-
-
-Uploaded image
-Uploaded image
-Now see this.. Other two logos are added... Same logos... Need to add to the previously removed ones.. 
-
-Generated image: Festive birthday greeting with balloons and gifts
-
-
-Edit
-
-
-Below logo required 
-
-Generated image: Happy birthday celebration with corporate flair
-
-
-Edit
-
-
-Below logo not required.... Sorry
-
-Generated image: Happy birthday celebration with gifts and balloons
-
-
-Edit
-
-
-Uploaded image
-Do the same thing for this as well 
-
-Generated image: Celebrating dedication and teamwork
-
-
-Edit
-
-
-Uploaded image
-Uploaded image
-These are original logos you should keep.. Don't alter any... Keep this logo adjusted... And give... 
-
-Generated image: Happy work anniversary celebration design
-
-
-Edit
-
-
-Uploaded image
-don''t change the size or any of any alignment... just remove the below logo.. add the previously added logos....   Strict node.. don't later or adjust text in that....keep follow the strict rules 
-
-Generated image: Happy birthday wishes and celebration
-
-
-Edit
-
-
-Uploaded image
-follow the same strict rules to this aswell.. like....don''t change the size or any of any alignment... just remove the below logo.. add the previously added logos.... Strict node.. don't later or adjust text in that....keep follow the strict rules
-
-Generated image: Work anniversary gratitude graphic
-
-
-Edit
-
-
-
-Pasted text.txt
-Document
-in the above code, name I need to bring little bit down ... at the same place.. for both birthday and anniversary
-
-For both birthday and anniversary, you only need to move the name text slightly down without changing alignment, size, positioning logic, or anything else. 
-
-
-Replace this section:
-
-const y = canvas.height * ((zone.top + zone.bottom) / 2);
-with this:
-
-const y =
-  canvas.height * ((zone.top + zone.bottom) / 2) + 25;
-If you want it even lower:
-
-+ 35
-or
-
-+ 40
-Recommended:
-
-const y =
-  canvas.height * ((zone.top + zone.bottom) / 2) + 30;
-This will:
-
-Keep exact same alignment
-
-Keep exact same font sizing
-
-Keep exact same safe-zone logic
-
-Only move the name slightly downward for both templates
-
-No other UI/text/logo changes whatsoever
-
-
-25 I kept, it went to top 
-
-Because your canvas coordinate system is already centered based on the safe-zone calculation, positive/negative movement may behave opposite depending on template alignment and textBaseline.
-
-To move the name down, use:
-
-const y =
-  canvas.height * ((zone.top + zone.bottom) / 2) - 25;
-If you want slightly lower:
-
-- 35
-Recommended:
-
-const y =
-  canvas.height * ((zone.top + zone.bottom) / 2) - 30;
-Only this line should change. Everything else remains untouched.
-
-
 const { createCanvas, loadImage } = require("canvas");
 const cloudinary = require("./cloudinary");
 
@@ -283,7 +145,7 @@ ctx.textBaseline = "middle";
 const zone = SAFE_ZONE[type];
 
 const x = canvas.width * (zone.x || 0.5);
-const y = canvas.height * ((zone.top + zone.bottom) / 2) + 25;
+const y = canvas.height * ((zone.top + zone.bottom) / 2);
 const maxWidth = canvas.width * zone.maxWidth;
 
 let displayName = name;
@@ -359,3 +221,4 @@ throw err;
 }
 
 module.exports = generateImage;
+
