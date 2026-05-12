@@ -51,14 +51,14 @@ const SAFE_ZONE = {
     bottom: 0.75,
     maxWidth: 0.65,
     baseFont: 70,
-    x: 0.5,
+    x: 0.520,
   },
   anniversary: {
-    top: 0.57,
-    bottom: 0.65,
+    top: 0.60,
+    bottom: 0.68,
     maxWidth: 0.35,
     baseFont: 55,
-    x: 0.72,
+    x: 0.73,
   },
 };
 
