@@ -145,7 +145,14 @@ async function generateImage({ name, type = "birthday", joinDate, union }) {
     const zone = SAFE_ZONE[type];
 
     const x = canvas.width * (zone.x || 0.5);
+    if(type === "birthday") {
     const y = canvas.height * ((zone.top + zone.bottom) / 1.8);
+      x += 25;
+    }
+       if(type === "anniversary") {
+    const y = canvas.height * ((zone.top + zone.bottom) / 1.6);
+         x += 15;
+    }
     const maxWidth = canvas.width * zone.maxWidth;
 
     let displayName = name;
