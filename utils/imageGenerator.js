@@ -20,7 +20,7 @@ function uploadBuffer(buffer, options = {}) {
 function getTemplateUrl(type, union) {
   const safeUnion = union?.replace(/\s+/g, "").toLowerCase();
 
-  return `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/unionwisher/templates/${type}_${safeUnion}.png`;
+  return `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${type}_${safeUnion}.png`;
 }
 
 // ==============================
@@ -36,7 +36,7 @@ async function loadTemplate(type, union) {
   } catch (err) {
     console.warn("⚠️ Using fallback template");
 
-    const fallback = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/unionwisher/templates/${type}.png`;
+    const fallback = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${type}.png`;
 
     return await loadImage(fallback);
   }
@@ -61,6 +61,7 @@ const SAFE_ZONE = {
     x: 0.73,
   },
 };
+
 
 // ==============================
 // 🔥 FONT AUTO FIT
