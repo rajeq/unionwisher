@@ -10,8 +10,11 @@ const todayStr = () => {
   return `${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 };
 
-cron.schedule('0 9 * * *', async () => {
+cron.schedule('* * * * *', async () => {
   console.log("🚀 Scheduler Started");
+  {
+  timezone: "Asia/Kolkata"
+  }
 
   const today = todayStr();
 
